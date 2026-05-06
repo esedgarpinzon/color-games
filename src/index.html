@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Matcher - UEC Academy</title>
+    <!-- Vincula el archivo de estilos -->
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Fruit Matcher</h1>
+    <div class="score-board">Puntos: <span id="score">0</span> / 8</div>
+    
+    <div class="game-grid">
+        <div class="column" id="audio-col">
+            <h3>Escucha</h3>
+        </div>
+        
+        <div class="column" id="image-col">
+            <h3>Fruta</h3>
+        </div>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+    <button id="reset-btn" style="display:none;" onclick="location.reload()">Reiniciar Juego</button>
+</div>
+
+<!-- Vincula el archivo de lógica -->
+<script src="./script.js"></script>
+
+</body>
+</html>
