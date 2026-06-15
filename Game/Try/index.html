@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Fruit Train - UEC Academy</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
@@ -523,47 +523,46 @@
     @keyframes confettiFall {
         to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
     }
+
 /* ==========================================
    ARREGLO PARA CELULARES Y PANTALLAS PEQUEÑAS
    ========================================== */
 
 /* 1. Evitar que el navegador haga zoom o seleccione texto al tocar */
 .game-container, .fruit, .speaker, .drop-zone {
-    touch-action: none; /* CRUCIAL: Evita que el celular intente hacer scroll al arrastrar */
+    touch-action: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
-    -webkit-tap-highlight-color: transparent; /* Quita el flash azul al tocar en Android/iOS */
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* 2. Escalar todo el juego cuando la pantalla es vertical o menor a 768px */
 @media (max-width: 768px), (orientation: portrait) {
     .game-container {
         /* Achicamos todo el juego al 65% de su tamaño original */
-        /* Puedes ajustar este número: 0.60 (más chico) o 0.75 (más grande) */
         transform: scale(0.65);
         
-        /* Lo anclamos arriba al centro para que no se corte abajo */
+        /* Lo anclamos arriba al centro */
         transform-origin: top center;
         
-        /* Compensamos el tamaño para que siga ocupando la pantalla virtualmente */
-        width: 153vw;  /* (100 / 0.65 = 153) */
-        height: 153vh;
+        /* MANTENEMOS 100vw para evitar la línea azul */
+        width: 100vw;
+        height: 100vh;
         
-        /* Aseguramos que no haya scrollbars feas */
         overflow: hidden;
     }
 
     /* 3. Ajustes finos para que las frutas no queden muy separadas en celular */
     .fruits-area {
-        gap: 15px; /* Menos espacio entre frutas */
-        bottom: 3%; /* Un poco más abajo para que se vean */
+        gap: 15px;
+        bottom: 3%;
     }
     
     .fruit {
-        width: 85px;  /* Frutas un poco más pequeñas */
+        width: 85px;
         height: 85px;
-        font-size: 55px; /* Emoji más pequeño */
+        font-size: 55px;
     }
 
     /* 4. Ajustar textos para que no se salgan de la pantalla */
@@ -578,9 +577,10 @@
         top: 55px;
         width: 90%;
         text-align: center;
-        white-space: normal; /* Permite que el texto baje de línea si es muy largo */
+        white-space: normal;
     }
-}</style>
+}
+</style>
 </head>
 <body>
 
@@ -750,8 +750,8 @@ function loadRound() {
     
     // Train arrives - FIX: Remove inline style first
     const train = document.getElementById('train');
-    train.style.left = ''; // Remove inline style
-    train.style.transition = ''; // Reset transition
+    train.style.left = '';
+    train.style.transition = '';
     train.classList.remove('leaving');
     train.classList.remove('arrived');
     setTrafficLight('red');
