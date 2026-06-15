@@ -11,6 +11,7 @@
         font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
         overflow: hidden;
         background: #87CEEB;
+        touch-action: none;
     }
     
     .game-container {
@@ -275,23 +276,20 @@
         color: white;
         transition: transform 0.2s;
         border: 3px solid #666;
-      
-        /* --- NUEVAS REGLAS DE POSICIÓN --- */
-    position: absolute;
-    top: -1px; /* Lo sube 65px por encima del borde del vagón */
-    left: 18%;
-    transform: translateX(-50%); /* Lo centra perfectamente */
-    z-index: 20; /* Asegura que esté por encima de todo y sea clicable */
-}
-   /* Mantenemos la animación que ya tenías */
-.speaker:hover { transform: translateX(-50%) scale(1.1); } /* Nota: agregué translateX para que no pierda el centro al hacer hover */
-.speaker:active { transform: translateX(-50%) scale(0.95); }
-.speaker.playing { animation: speakerPulse 0.5s; }
+        position: absolute;
+        top: -1px;
+        left: 18%;
+        transform: translateX(-50%);
+        z-index: 20;
+    }
+    .speaker:hover { transform: translateX(-50%) scale(1.1); }
+    .speaker:active { transform: translateX(-50%) scale(0.95); }
+    .speaker.playing { animation: speakerPulse 0.5s; }
 
-@keyframes speakerPulse {
-    0%, 100% { transform: translateX(-50%) scale(1); }
-    50% { transform: translateX(-50%) scale(1.2); background: #FFD700; }
-}
+    @keyframes speakerPulse {
+        0%, 100% { transform: translateX(-50%) scale(1); }
+        50% { transform: translateX(-50%) scale(1.2); background: #FFD700; }
+    }
     
     .drop-zone {
         position: absolute;
@@ -355,7 +353,10 @@
         0% { transform: scale(0.5); opacity: 0; }
         100% { transform: scale(1); opacity: 1; }
     }
-    .fruit.placed { visibility: hidden; }
+    .fruit.placed { 
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
     
     /* Word popup */
     .word-popup {
@@ -524,91 +525,72 @@
         to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
     }
 
-/* ==========================================
-   ARREGLO PARA CELULARES Y PANTALLAS PEQUEÑAS
-   ========================================== */
-
-/* 1. Evitar que el navegador haga zoom o seleccione texto al tocar */
-.game-container, .fruit, .speaker, .drop-zone {
-    touch-action: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* 2. Escalar todo el juego cuando la pantalla es vertical o menor a 768px */
-@media (max-width: 768px), (orientation: portrait) {
-    .game-container {
-        /* Achicamos todo el juego al 65% de su tamaño original */
-        transform: scale(0.99);
-        
-        /* Lo anclamos arriba al centro */
-        transform-origin: top center;
-        
-        /* MANTENEMOS 100vw para evitar la línea azul */
-        width: 100vw;
-        height: 100vh;
-        
-        overflow: hidden;
-   /* Mover el tren más a la izquierda en celular */
-.train.arrived {
-    left: 5% !important;  /* Cambia de 35% a 5% */
-}
-
-/* Opcional: hacer el tren un poquito más chico para que quepan los 2 vagones */
-.train {
-    transform: scale(0.85);
-    transform-origin: bottom left;
-}
-
-/* Ajustar la estación también para que no se vea tan a la derecha */
-.station {
-    left: 5% !important;
-    transform: scale(0.8);
-    transform-origin: bottom left;
-}
-
-.farmer {
-    left: 15% !important;
-}
-
-.traffic-light {
-    right: 5% !important;
-} }
-
-    /* 3. Ajustes finos para que las frutas no queden muy separadas en celular */
-    .fruits-area {
-        gap: 15px;
-        bottom: 39%;
-    }
-    
-    .fruit {
-        width: 85px;
-        height: 85px;
-        font-size: 55px;
+    /* Clones de frutas durante arrastre */
+    .fruit-clone {
+        pointer-events: none !important;
+        z-index: 9999 !important;
     }
 
-    /* 4. Ajustar textos para que no se salgan de la pantalla */
-    .ui-top {
-        font-size: 16px;
-        padding: 8px 15px;
-        top: 10px;
+    /* ==========================================
+       CONFIGURACIÓN UNIVERSAL (PC + MÓVIL)
+       ========================================== */
+    .game-container, .fruit, .speaker, .drop-zone {
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
     }
-    
-    .instruction {
-        font-size: 14px;
-        top: 55px;
-        width: 90%;
-        text-align: center;
-        white-space: normal;
+
+    /* ==========================================
+       RESPONSIVE - AJUSTES PARA MÓVIL
+       ========================================== */
+    @media (max-width: 768px), (orientation: portrait) {
+        .train.arrived {
+            left: 5% !important;
+        }
+        .train {
+            transform: scale(0.85);
+            transform-origin: bottom left;
+        }
+        .station {
+            left: 5% !important;
+            transform: scale(0.8);
+            transform-origin: bottom left;
+        }
+        .farmer {
+            left: 15% !important;
+        }
+        .traffic-light {
+            right: 5% !important;
+        }
+        .fruits-area {
+            gap: 15px;
+            bottom: 39%;
+        }
+        .fruit {
+            width: 85px;
+            height: 85px;
+            font-size: 55px;
+        }
+        .ui-top {
+            font-size: 16px;
+            padding: 8px 15px;
+            top: 10px;
+        }
+        .instruction {
+            font-size: 14px;
+            top: 55px;
+            width: 90%;
+            text-align: center;
+            white-space: normal;
+        }
     }
-}
 </style>
 </head>
 <body>
 
-<div class="game-container">
+<div class="game-container" id="game-container">
     <!-- Sky elements -->
     <div class="sun"></div>
     <div class="cloud cloud1"></div>
@@ -699,7 +681,22 @@ let placedInWagon1 = null;
 let placedInWagon2 = null;
 let roundActive = false;
 
-// Generate 5 random rounds
+// ==========================================
+// FUNCIÓN CLAVE: DETECTAR DÓNDE SE SOLTÓ LA FRUTA
+// Usa elementFromPoint que funciona perfecto con escalas
+// ==========================================
+function getDropZoneAt(x, y) {
+    const element = document.elementFromPoint(x, y);
+    if (!element) return null;
+    
+    if (element.classList && element.classList.contains('drop-zone')) {
+        return element;
+    }
+    
+    const parent = element.closest('.drop-zone');
+    return parent;
+}
+
 function generateRounds() {
     rounds = [];
     for (let i = 0; i < totalRounds; i++) {
@@ -758,6 +755,9 @@ function loadRound() {
     placedInWagon1 = null;
     placedInWagon2 = null;
     
+    // IMPORTANTE: Limpiar cualquier clone residual de rondas anteriores
+    document.querySelectorAll('.fruit-clone').forEach(c => c.remove());
+    
     document.getElementById('round-num').textContent = currentRound + 1;
     document.getElementById('instruction').textContent = '🚂 The train is arriving...';
     
@@ -772,7 +772,7 @@ function loadRound() {
     // Clear fruits area
     document.getElementById('fruits-area').innerHTML = '';
     
-    // Train arrives - FIX: Remove inline style first
+    // Train arrives
     const train = document.getElementById('train');
     train.style.left = '';
     train.style.transition = '';
@@ -780,14 +780,13 @@ function loadRound() {
     train.classList.remove('arrived');
     setTrafficLight('red');
     
-    // Force reflow
     void train.offsetWidth;
     
     setTimeout(() => {
         train.classList.add('arrived');
     }, 100);
     
-    // After train arrives, load fruits and activate round
+    // Load fruits
     setTimeout(() => {
         const round = rounds[currentRound];
         
@@ -799,6 +798,7 @@ function loadRound() {
             div.dataset.id = fruit.id;
             div.textContent = fruit.emoji;
             
+            // === MOUSE (PC) ===
             div.addEventListener('dragstart', (e) => {
                 if (!roundActive) { e.preventDefault(); return; }
                 e.dataTransfer.setData('text/plain', fruit.id);
@@ -808,55 +808,91 @@ function loadRound() {
                 div.classList.remove('dragging');
             });
             
-            // Touch support
+            // === TOUCH (MÓVIL) - VERSIÓN CORREGIDA ===
             let touchOffsetX = 0, touchOffsetY = 0;
             let clone = null;
+            let isDragging = false;
             
             div.addEventListener('touchstart', (e) => {
                 if (!roundActive) return;
+                e.preventDefault();
+                
                 const touch = e.touches[0];
                 const rect = div.getBoundingClientRect();
                 touchOffsetX = touch.clientX - rect.left;
                 touchOffsetY = touch.clientY - rect.top;
+                
                 clone = div.cloneNode(true);
+                clone.classList.add('fruit-clone');
                 clone.style.position = 'fixed';
-                clone.style.zIndex = '1000';
+                clone.style.zIndex = '9999';
                 clone.style.pointerEvents = 'none';
                 clone.style.width = rect.width + 'px';
                 clone.style.height = rect.height + 'px';
                 clone.style.left = (touch.clientX - touchOffsetX) + 'px';
                 clone.style.top = (touch.clientY - touchOffsetY) + 'px';
+                clone.style.opacity = '0.9';
+                clone.style.transition = 'none';
                 document.body.appendChild(clone);
+                
                 div.style.opacity = '0.3';
-            });
+                isDragging = true;
+            }, { passive: false });
             
             div.addEventListener('touchmove', (e) => {
-                if (!clone) return;
+                if (!clone || !isDragging) return;
                 e.preventDefault();
+                
                 const touch = e.touches[0];
                 clone.style.left = (touch.clientX - touchOffsetX) + 'px';
                 clone.style.top = (touch.clientY - touchOffsetY) + 'px';
+                
+                clone.style.display = 'none';
+                const dropZone = getDropZoneAt(touch.clientX, touch.clientY);
+                clone.style.display = '';
+                
+                if (dropZone && !dropZone.classList.contains('filled')) {
+                    dropZone.classList.add('drag-over');
+                }
             }, { passive: false });
             
             div.addEventListener('touchend', (e) => {
-                if (!clone) return;
+                if (!isDragging) return;
+                
                 const touch = e.changedTouches[0];
-                clone.remove();
-                clone = null;
-                div.style.opacity = '1';
                 
-                const drop1 = document.getElementById('drop1');
-                const drop2 = document.getElementById('drop2');
-                const rect1 = drop1.getBoundingClientRect();
-                const rect2 = drop2.getBoundingClientRect();
-                
-                if (touch.clientX >= rect1.left && touch.clientX <= rect1.right &&
-                    touch.clientY >= rect1.top && touch.clientY <= rect1.bottom) {
-                    handleDrop(fruit.id, 1, div);
-                } else if (touch.clientX >= rect2.left && touch.clientX <= rect2.right &&
-                           touch.clientY >= rect2.top && touch.clientY <= rect2.bottom) {
-                    handleDrop(fruit.id, 2, div);
+                if (clone) {
+                    clone.remove();
+                    clone = null;
                 }
+                div.style.opacity = '1';
+                isDragging = false;
+                
+                document.querySelectorAll('.drop-zone').forEach(dz => {
+                    dz.classList.remove('drag-over');
+                });
+                
+                const dropZone = getDropZoneAt(touch.clientX, touch.clientY);
+                
+                if (dropZone) {
+                    if (dropZone.id === 'drop1') {
+                        handleDrop(fruit.id, 1, div);
+                    } else if (dropZone.id === 'drop2') {
+                        handleDrop(fruit.id, 2, div);
+                    }
+                }
+            });
+            
+            div.addEventListener('touchcancel', (e) => {
+                if (clone) {
+                    clone.remove();
+                    clone = null;
+                }
+                div.style.opacity = '1';
+                isDragging = false;
+                document.querySelectorAll('.drop-zone').forEach(dz => {
+                    dz.classList.remove('drag-over');
+                });
             });
             
             fruitsArea.appendChild(div);
@@ -873,10 +909,7 @@ function setupSpeakers() {
 }
 
 function playWagon(wagonNum) {
-    if (!roundActive) {
-        console.log('Round not active');
-        return;
-    }
+    if (!roundActive) return;
     const round = rounds[currentRound];
     const fruit = wagonNum === 1 ? round.wagon1 : round.wagon2;
     
@@ -918,9 +951,9 @@ function handleDrop(fruitId, wagonNum) {
     const alreadyPlaced = wagonNum === 1 ? placedInWagon1 : placedInWagon2;
     
     if (alreadyPlaced) return;
+    if (!fruitEl) return;
     
     if (droppedFruit.id === correctFruit.id) {
-        // Correct!
         fruitEl.classList.add('placed');
         dropZone.innerHTML = droppedFruit.emoji;
         dropZone.classList.add('filled');
@@ -930,7 +963,6 @@ function handleDrop(fruitId, wagonNum) {
         
         speak('Correct! ' + droppedFruit.name);
         
-        // Check if both wagons filled
         if (placedInWagon1 && placedInWagon2) {
             roundActive = false;
             setTimeout(() => {
@@ -947,12 +979,11 @@ function handleDrop(fruitId, wagonNum) {
             }, 800);
         }
     } else {
-        // Wrong! Fruit returns
         mistakes.push(droppedFruit);
         fruitEl.classList.add('returning');
         speak('Try again!');
         setTimeout(() => {
-            fruitEl.classList.remove('returning');
+            if (fruitEl) fruitEl.classList.remove('returning');
         }, 600);
     }
 }
@@ -987,7 +1018,6 @@ function showFinalScreen() {
         reviewBox.innerHTML = html;
     }
     
-    // Confetti
     for (let i = 0; i < 60; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
