@@ -541,7 +541,7 @@
 @media (max-width: 768px), (orientation: portrait) {
     .game-container {
         /* Achicamos todo el juego al 65% de su tamaño original */
-        transform: scale(0.65);
+        transform: scale(0.99);
         
         /* Lo anclamos arriba al centro */
         transform-origin: top center;
@@ -551,7 +551,31 @@
         height: 100vh;
         
         overflow: hidden;
-    }
+   /* Mover el tren más a la izquierda en celular */
+.train.arrived {
+    left: 5% !important;  /* Cambia de 35% a 5% */
+}
+
+/* Opcional: hacer el tren un poquito más chico para que quepan los 2 vagones */
+.train {
+    transform: scale(0.85);
+    transform-origin: bottom left;
+}
+
+/* Ajustar la estación también para que no se vea tan a la derecha */
+.station {
+    left: 5% !important;
+    transform: scale(0.8);
+    transform-origin: bottom left;
+}
+
+.farmer {
+    left: 15% !important;
+}
+
+.traffic-light {
+    right: 5% !important;
+} }
 
     /* 3. Ajustes finos para que las frutas no queden muy separadas en celular */
     .fruits-area {
