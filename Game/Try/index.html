@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fruit Train - UEC Academy</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    
+    body {
+        font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+        overflow: hidden;
+        background: #87CEEB;
+    }
+    
+    .game-container {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 60%, #90EE90 60%, #228B22 100%);
+    }
+    
+    /* Sun */
+    .sun {
+        position: absolute;
+        top: 30px;
+        right: 50px;
+        width: 70px;
+        height: 70px;
+        background: #FFD700;
+        border-radius: 50%;
+        box-shadow: 0 0 40px #FFD700;
+        animation: sunPulse 3s infinite;
+    }
+    @keyframes sunPulse {
+        0%, 100% { box-shadow: 0 0 40px #FFD700; }
+        50% { box-shadow: 0 0 60px #FFA500; }
+    }
+    
+    /* Clouds */
+    .cloud {
+        position: absolute;
+        background: white;
+        border-radius: 50px;
+        opacity: 0.9;
+        animation: cloudMove 30s linear infinite;
+    }
+    .cloud::before, .cloud::after {
+        content: '';
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+    }
+    .cloud1 { width: 80px; height: 25px; top: 60px; left: -100px; }
+    .cloud1::before { width: 40px; height: 40px; top: -20px; left: 10px; }
+    .cloud1::after { width: 30px; height: 30px; top: -15px; right: 10px; }
+    .cloud2 { width: 100px; height: 30px; top: 120px; left: -150px; animation-duration: 45s; animation-delay: -10s; }
+    .cloud2::before { width: 50px; height: 50px; top: -25px; left: 15px; }
+    .cloud2::after { width: 40px; height: 40px; top: -20px; right: 15px; }
+    @keyframes cloudMove {
+        from { transform: translateX(0); }
+        to { transform: translateX(120vw); }
+    }
+    
+    /* Tree */
+    .tree {
+        position: absolute;
+        bottom: 40%;
+        left: 5%;
+        font-size: 80px;
+        z-index: 2;
+    }
+    
+    /* Train station */
+    .station {
+        position: absolute;
+        bottom: 40%;
+        left: 15%;
+        width: 200px;
+        height: 140px;
+        background: #8B4513;
+        border: 4px solid #654321;
+        border-radius: 10px 10px 0 0;
+        z-index: 3;
+    }
+    .station::before {
+        content: 'STATION';
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #654321;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .station-roof {
+        position: absolute;
+        top: -40px;
+        left: -10px;
+        width: 220px;
+        height: 20px;
+        background: #A52A2A;
+        border-radius: 5px;
+    }
+    
+    /* Farmer */
+    .farmer {
+        position: absolute;
+        bottom: 40%;
+        left: 22%;
+        font-size: 60px;
+        z-index: 4;
+        transform-origin: bottom center;
+        animation: farmerWave 3s infinite;
+    }
+    @keyframes farmerWave {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-5deg); }
+    }
+    
+    /* Traffic light */
+    .traffic-light {
+        position: absolute;
+        bottom: 40%;
+        right: 15%;
+        width: 40px;
+        background: #333;
+        border-radius: 10px;
+        padding: 5px;
+        z-index: 5;
+    }
+    .light {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin: 3px auto;
+        background: #444;
+        transition: all 0.3s;
+    }
+    .light.red-on { background: #ff3030; box-shadow: 0 0 20px #ff3030; }
+    .light.green-on { background: #30ff30; box-shadow: 0 0 20px #30ff30; }
+    .light-pole {
+        position: absolute;
+        bottom: -80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 80px;
+        background: #333;
+    }
+    
+    /* Train track */
+    .track {
+        position: absolute;
+        bottom: 30%;
+        left: 0;
+        width: 100%;
+        height: 30px;
+        background: #8B4513;
+        z-index: 1;
+    }
+    .track::before {
+        content: '';
+        position: absolute;
+        top: 5px;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #666;
+    }
+    .track::after {
+        content: '';
+        position: absolute;
+        bottom: 5px;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #666;
+    }
+    
+    /* Train */
+    .train {
+        position: absolute;
+        bottom: 32%;
+        left: -600px;
+        display: flex;
+        align-items: flex-end;
+        z-index: 6;
+        transition: left 2s ease-in-out;
+    }
+    .train.arrived { left: 35%; }
+    .train.leaving { left: 120vw; transition: left 2.5s ease-in; }
+    
+    .locomotive {
+        width: 120px;
+        height: 100px;
+        background: #DC143C;
+        border-radius: 10px 20px 5px 5px;
+        position: relative;
+        border: 3px solid #8B0000;
+    }
+    .locomotive::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        left: 20px;
+        width: 25px;
+        height: 25px;
+        background: #333;
+        border-radius: 3px;
+    }
+    .locomotive-window {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 40px;
+        height: 35px;
+        background: #87CEEB;
+        border: 2px solid #333;
+        border-radius: 5px;
+    }
+    .wheel {
+        position: absolute;
+        bottom: -12px;
+        width: 25px;
+        height: 25px;
+        background: #222;
+        border-radius: 50%;
+        border: 3px solid #666;
+    }
+    .wheel::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        background: #999;
+        border-radius: 50%;
+    }
+    .wheel1 { left: 10px; }
+    .wheel2 { right: 10px; }
+    
+    .wagon {
+        width: 140px;
+        height: 90px;
+        background: #4169E1;
+        border-radius: 8px;
+        margin-left: 5px;
+        position: relative;
+        border: 3px solid #00008B;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .wagon1 { background: #FF8C00; border-color: #8B4500; }
+    .wagon2 { background: #32CD32; border-color: #006400; }
+    
+    .speaker {
+        width: 50px;
+        height: 50px;
+        background: #333;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 28px;
+        color: white;
+        transition: transform 0.2s;
+        border: 3px solid #666;
+      
+        /* --- NUEVAS REGLAS DE POSICIÓN --- */
+    position: absolute;
+    top: -1px; /* Lo sube 65px por encima del borde del vagón */
+    left: 18%;
+    transform: translateX(-50%); /* Lo centra perfectamente */
+    z-index: 20; /* Asegura que esté por encima de todo y sea clicable */
+}
+   /* Mantenemos la animación que ya tenías */
+.speaker:hover { transform: translateX(-50%) scale(1.1); } /* Nota: agregué translateX para que no pierda el centro al hacer hover */
+.speaker:active { transform: translateX(-50%) scale(0.95); }
+.speaker.playing { animation: speakerPulse 0.5s; }
+
+@keyframes speakerPulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.2); background: #FFD700; }
+}
+    
+    .drop-zone {
+        position: absolute;
+        top: -76px;
+        left: 50%;
+        transform: translateX(-35%);
+        width: 100px;
+        height: 150px;
+        border: 3px dashed rgba(255,255,255,0.7);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: white;
+        font-weight: bold;
+        z-index: 5;
+    }
+    .drop-zone.drag-over {
+        background: rgba(255,255,255,0.3);
+        border-color: #FFD700;
+    }
+    .drop-zone.filled {
+        border-style: solid;
+        border-color: #FFD700;
+        background: rgba(255,255,255,0.4);
+        font-size: 50px;
+    }
+    
+    /* Fruits area */
+    .fruits-area {
+        position: absolute;
+        bottom: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 30px;
+        z-index: 10;
+    }
+    
+    .fruit {
+        width: 110px;
+        height: 110px;
+        background: white;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        border: 4px solid #FFD700;
+        transition: transform 0.3s, opacity 0.3s;
+        font-size: 70px;
+    }
+    .fruit:hover { transform: scale(1.05) rotate(-3deg); }
+    .fruit.dragging { opacity: 0.5; cursor: grabbing; }
+    .fruit.returning {
+        animation: returnFruit 0.6s ease-out;
+    }
+    @keyframes returnFruit {
+        0% { transform: scale(0.5); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .fruit.placed { visibility: hidden; }
+    
+    /* Word popup */
+    .word-popup {
+        position: absolute;
+        top: 35%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 15px 40px;
+        border-radius: 15px;
+        font-size: 40px;
+        font-weight: bold;
+        color: #DC143C;
+        border: 5px solid #FFD700;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 20;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+    .word-popup.show { opacity: 1; animation: wordPop 0.3s; }
+    @keyframes wordPop {
+        0% { transform: translateX(-50%) scale(0.5); }
+        100% { transform: translateX(-50%) scale(1); }
+    }
+    
+    /* UI */
+    .ui-top {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255,255,255,0.95);
+        padding: 10px 30px;
+        border-radius: 30px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #333;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 15;
+        border: 3px solid #FFD700;
+    }
+    
+    .instruction {
+        position: absolute;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255,215,0,0.95);
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        z-index: 15;
+        white-space: nowrap;
+    }
+    
+    /* Final screen */
+    .final-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        color: white;
+        padding: 20px;
+    }
+    .final-screen.show { display: flex; animation: fadeIn 0.5s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    .money-sticker {
+        font-size: 120px;
+        animation: moneyBounce 1s infinite;
+    }
+    @keyframes moneyBounce {
+        0%, 100% { transform: translateY(0) rotate(-5deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+    }
+    
+    .congrats-text {
+        font-size: 32px;
+        text-align: center;
+        margin: 20px 0;
+        color: #FFD700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        font-weight: bold;
+    }
+    
+    .review-box {
+        background: white;
+        color: #333;
+        padding: 20px;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 250px;
+        overflow-y: auto;
+        margin: 15px 0;
+        border: 4px solid #FFD700;
+    }
+    .review-box h3 {
+        color: #DC143C;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    .review-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 8px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+    .review-item .emoji { font-size: 40px; }
+    .review-item .play-btn {
+        background: #4169E1;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-left: auto;
+    }
+    .review-item .play-btn:hover { background: #1E90FF; }
+    .no-mistakes {
+        text-align: center;
+        font-size: 20px;
+        color: #32CD32;
+        font-weight: bold;
+    }
+    
+    .restart-btn {
+        background: #32CD32;
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-size: 22px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        margin-top: 10px;
+        transition: transform 0.2s;
+    }
+    .restart-btn:hover { transform: scale(1.05); background: #228B22; }
+    
+    /* Confetti */
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        top: -10px;
+        z-index: 99;
+        animation: confettiFall 3s linear forwards;
+    }
+    @keyframes confettiFall {
+        to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+/* ==========================================
+   ARREGLO PARA CELULARES Y PANTALLAS PEQUEÑAS
+   ========================================== */
+
+/* 1. Evitar que el navegador haga zoom o seleccione texto al tocar */
+.game-container, .fruit, .speaker, .drop-zone {
+    touch-action: none; /* CRUCIAL: Evita que el celular intente hacer scroll al arrastrar */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; /* Quita el flash azul al tocar en Android/iOS */
+}
+
+/* 2. Escalar todo el juego cuando la pantalla es vertical o menor a 768px */
+@media (max-width: 768px), (orientation: portrait) {
+    .game-container {
+        /* Achicamos todo el juego al 65% de su tamaño original */
+        /* Puedes ajustar este número: 0.60 (más chico) o 0.75 (más grande) */
+        transform: scale(0.65);
+        
+        /* Lo anclamos arriba al centro para que no se corte abajo */
+        transform-origin: top center;
+        
+        /* Compensamos el tamaño para que siga ocupando la pantalla virtualmente */
+        width: 153vw;  /* (100 / 0.65 = 153) */
+        height: 153vh;
+        
+        /* Aseguramos que no haya scrollbars feas */
+        overflow: hidden;
+    }
+
+    /* 3. Ajustes finos para que las frutas no queden muy separadas en celular */
+    .fruits-area {
+        gap: 15px; /* Menos espacio entre frutas */
+        bottom: 3%; /* Un poco más abajo para que se vean */
+    }
+    
+    .fruit {
+        width: 85px;  /* Frutas un poco más pequeñas */
+        height: 85px;
+        font-size: 55px; /* Emoji más pequeño */
+    }
+
+    /* 4. Ajustar textos para que no se salgan de la pantalla */
+    .ui-top {
+        font-size: 16px;
+        padding: 8px 15px;
+        top: 10px;
+    }
+    
+    .instruction {
+        font-size: 14px;
+        top: 55px;
+        width: 90%;
+        text-align: center;
+        white-space: normal; /* Permite que el texto baje de línea si es muy largo */
+    }
+}</style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- Sky elements -->
+    <div class="sun"></div>
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    
+    <!-- Tree -->
+    <div class="tree">🌳</div>
+    
+    <!-- Station -->
+    <div class="station">
+        <div class="station-roof"></div>
+    </div>
+    
+    <!-- Farmer -->
+    <div class="farmer">👨‍🌾</div>
+    
+    <!-- Traffic light -->
+    <div class="traffic-light">
+        <div class="light" id="red-light"></div>
+        <div class="light" id="green-light"></div>
+        <div class="light-pole"></div>
+    </div>
+    
+    <!-- Track -->
+    <div class="track"></div>
+    
+    <!-- Train -->
+    <div class="train" id="train">
+        <div class="locomotive">
+            <div class="locomotive-window"></div>
+            <div class="wheel wheel1"></div>
+            <div class="wheel wheel2"></div>
+        </div>
+        <div class="wagon wagon1" id="wagon1">
+            <div class="drop-zone" id="drop1">DROP</div>
+            <div class="speaker" id="speaker1">🔊</div>
+            <div class="wheel wheel1"></div>
+            <div class="wheel wheel2"></div>
+        </div>
+        <div class="wagon wagon2" id="wagon2">
+            <div class="drop-zone" id="drop2">DROP</div>
+            <div class="speaker" id="speaker2">🔊</div>
+            <div class="wheel wheel1"></div>
+            <div class="wheel wheel2"></div>
+        </div>
+    </div>
+    
+    <!-- Fruits area -->
+    <div class="fruits-area" id="fruits-area"></div>
+    
+    <!-- Word popup -->
+    <div class="word-popup" id="word-popup"></div>
+    
+    <!-- UI -->
+    <div class="ui-top">🚂 Round: <span id="round-num">1</span> / 5</div>
+    <div class="instruction" id="instruction">🎧 Listen to the fruit, then drag it to the wagon!</div>
+</div>
+
+<!-- Final screen -->
+<div class="final-screen" id="final-screen">
+    <div class="money-sticker">💰</div>
+    <div class="congrats-text" id="congrats-text">
+        🎉 Congratulations! Great job! 🎉<br>
+        You brought all the fruits to the market!<br>
+        ⭐ Mission Accomplished! ⭐
+    </div>
+    <div class="review-box" id="review-box"></div>
+    <button class="restart-btn" onclick="location.reload()">🔄 Play Again!</button>
+</div>
+
+<script>
+const fruits = [
+    { id: 1, name: 'Banana', emoji: '🍌' },
+    { id: 2, name: 'Apple', emoji: '🍎' },
+    { id: 3, name: 'Pear', emoji: '🍐' },
+    { id: 4, name: 'Peach', emoji: '🍑' },
+    { id: 5, name: 'Orange', emoji: '🍊' },
+    { id: 6, name: 'Melon', emoji: '🍈' },
+    { id: 7, name: 'Mango', emoji: '🥭' },
+    { id: 8, name: 'Lemon', emoji: '🍋' }
+];
+
+let currentRound = 0;
+let totalRounds = 5;
+let rounds = [];
+let mistakes = [];
+let placedInWagon1 = null;
+let placedInWagon2 = null;
+let roundActive = false;
+
+// Generate 5 random rounds
+function generateRounds() {
+    rounds = [];
+    for (let i = 0; i < totalRounds; i++) {
+        const shuffled = [...fruits].sort(() => Math.random() - 0.5);
+        const threeFruits = shuffled.slice(0, 3);
+        const shuffledCorrect = [...threeFruits].sort(() => Math.random() - 0.5);
+        const correct1 = shuffledCorrect[0];
+        const correct2 = shuffledCorrect[1];
+        const distractor = threeFruits.find(f => f.id !== correct1.id && f.id !== correct2.id);
+        
+        const wagonAssignment = Math.random() < 0.5 ? 
+            { wagon1: correct1, wagon2: correct2 } : 
+            { wagon1: correct2, wagon2: correct1 };
+        
+        rounds.push({
+            fruits: threeFruits.sort(() => Math.random() - 0.5),
+            wagon1: wagonAssignment.wagon1,
+            wagon2: wagonAssignment.wagon2,
+            distractor: distractor
+        });
+    }
+}
+
+function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85;
+    utterance.pitch = 1.1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+}
+
+function showWord(word) {
+    const popup = document.getElementById('word-popup');
+    popup.textContent = word;
+    popup.classList.add('show');
+    setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function setTrafficLight(color) {
+    const red = document.getElementById('red-light');
+    const green = document.getElementById('green-light');
+    red.classList.remove('red-on');
+    green.classList.remove('green-on');
+    if (color === 'red') red.classList.add('red-on');
+    else if (color === 'green') green.classList.add('green-on');
+}
+
+function loadRound() {
+    if (currentRound >= totalRounds) {
+        showFinalScreen();
+        return;
+    }
+    
+    roundActive = false;
+    placedInWagon1 = null;
+    placedInWagon2 = null;
+    
+    document.getElementById('round-num').textContent = currentRound + 1;
+    document.getElementById('instruction').textContent = '🚂 The train is arriving...';
+    
+    // Reset drop zones
+    const drop1 = document.getElementById('drop1');
+    const drop2 = document.getElementById('drop2');
+    drop1.innerHTML = 'DROP';
+    drop2.innerHTML = 'DROP';
+    drop1.classList.remove('filled');
+    drop2.classList.remove('filled');
+    
+    // Clear fruits area
+    document.getElementById('fruits-area').innerHTML = '';
+    
+    // Train arrives - FIX: Remove inline style first
+    const train = document.getElementById('train');
+    train.style.left = ''; // Remove inline style
+    train.style.transition = ''; // Reset transition
+    train.classList.remove('leaving');
+    train.classList.remove('arrived');
+    setTrafficLight('red');
+    
+    // Force reflow
+    void train.offsetWidth;
+    
+    setTimeout(() => {
+        train.classList.add('arrived');
+    }, 100);
+    
+    // After train arrives, load fruits and activate round
+    setTimeout(() => {
+        const round = rounds[currentRound];
+        
+        const fruitsArea = document.getElementById('fruits-area');
+        round.fruits.forEach(fruit => {
+            const div = document.createElement('div');
+            div.className = 'fruit';
+            div.draggable = true;
+            div.dataset.id = fruit.id;
+            div.textContent = fruit.emoji;
+            
+            div.addEventListener('dragstart', (e) => {
+                if (!roundActive) { e.preventDefault(); return; }
+                e.dataTransfer.setData('text/plain', fruit.id);
+                div.classList.add('dragging');
+            });
+            div.addEventListener('dragend', () => {
+                div.classList.remove('dragging');
+            });
+            
+            // Touch support
+            let touchOffsetX = 0, touchOffsetY = 0;
+            let clone = null;
+            
+            div.addEventListener('touchstart', (e) => {
+                if (!roundActive) return;
+                const touch = e.touches[0];
+                const rect = div.getBoundingClientRect();
+                touchOffsetX = touch.clientX - rect.left;
+                touchOffsetY = touch.clientY - rect.top;
+                clone = div.cloneNode(true);
+                clone.style.position = 'fixed';
+                clone.style.zIndex = '1000';
+                clone.style.pointerEvents = 'none';
+                clone.style.width = rect.width + 'px';
+                clone.style.height = rect.height + 'px';
+                clone.style.left = (touch.clientX - touchOffsetX) + 'px';
+                clone.style.top = (touch.clientY - touchOffsetY) + 'px';
+                document.body.appendChild(clone);
+                div.style.opacity = '0.3';
+            });
+            
+            div.addEventListener('touchmove', (e) => {
+                if (!clone) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                clone.style.left = (touch.clientX - touchOffsetX) + 'px';
+                clone.style.top = (touch.clientY - touchOffsetY) + 'px';
+            }, { passive: false });
+            
+            div.addEventListener('touchend', (e) => {
+                if (!clone) return;
+                const touch = e.changedTouches[0];
+                clone.remove();
+                clone = null;
+                div.style.opacity = '1';
+                
+                const drop1 = document.getElementById('drop1');
+                const drop2 = document.getElementById('drop2');
+                const rect1 = drop1.getBoundingClientRect();
+                const rect2 = drop2.getBoundingClientRect();
+                
+                if (touch.clientX >= rect1.left && touch.clientX <= rect1.right &&
+                    touch.clientY >= rect1.top && touch.clientY <= rect1.bottom) {
+                    handleDrop(fruit.id, 1, div);
+                } else if (touch.clientX >= rect2.left && touch.clientX <= rect2.right &&
+                           touch.clientY >= rect2.top && touch.clientY <= rect2.bottom) {
+                    handleDrop(fruit.id, 2, div);
+                }
+            });
+            
+            fruitsArea.appendChild(div);
+        });
+        
+        document.getElementById('instruction').textContent = '🎧 Press the speaker 🔊 to hear the fruit name!';
+        roundActive = true;
+    }, 2200);
+}
+
+function setupSpeakers() {
+    document.getElementById('speaker1').onclick = () => playWagon(1);
+    document.getElementById('speaker2').onclick = () => playWagon(2);
+}
+
+function playWagon(wagonNum) {
+    if (!roundActive) {
+        console.log('Round not active');
+        return;
+    }
+    const round = rounds[currentRound];
+    const fruit = wagonNum === 1 ? round.wagon1 : round.wagon2;
+    
+    const speaker = document.getElementById('speaker' + wagonNum);
+    speaker.classList.add('playing');
+    setTimeout(() => speaker.classList.remove('playing'), 500);
+    
+    speak(fruit.name);
+    showWord(fruit.name);
+}
+
+function setupDropZones() {
+    ['drop1', 'drop2'].forEach((id, idx) => {
+        const zone = document.getElementById(id);
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            const fruitId = parseInt(e.dataTransfer.getData('text/plain'));
+            handleDrop(fruitId, idx + 1);
+        });
+    });
+}
+
+function handleDrop(fruitId, wagonNum) {
+    if (!roundActive) return;
+    
+    const round = rounds[currentRound];
+    const correctFruit = wagonNum === 1 ? round.wagon1 : round.wagon2;
+    const droppedFruit = fruits.find(f => f.id === fruitId);
+    const fruitEl = document.querySelector(`.fruit[data-id="${fruitId}"]`);
+    const dropZone = document.getElementById('drop' + wagonNum);
+    const alreadyPlaced = wagonNum === 1 ? placedInWagon1 : placedInWagon2;
+    
+    if (alreadyPlaced) return;
+    
+    if (droppedFruit.id === correctFruit.id) {
+        // Correct!
+        fruitEl.classList.add('placed');
+        dropZone.innerHTML = droppedFruit.emoji;
+        dropZone.classList.add('filled');
+        
+        if (wagonNum === 1) placedInWagon1 = droppedFruit;
+        else placedInWagon2 = droppedFruit;
+        
+        speak('Correct! ' + droppedFruit.name);
+        
+        // Check if both wagons filled
+        if (placedInWagon1 && placedInWagon2) {
+            roundActive = false;
+            setTimeout(() => {
+                setTrafficLight('green');
+                document.getElementById('instruction').textContent = '🟢 Train is leaving!';
+                const train = document.getElementById('train');
+                train.classList.remove('arrived');
+                train.classList.add('leaving');
+                
+                setTimeout(() => {
+                    currentRound++;
+                    loadRound();
+                }, 2600);
+            }, 800);
+        }
+    } else {
+        // Wrong! Fruit returns
+        mistakes.push(droppedFruit);
+        fruitEl.classList.add('returning');
+        speak('Try again!');
+        setTimeout(() => {
+            fruitEl.classList.remove('returning');
+        }, 600);
+    }
+}
+
+function showFinalScreen() {
+    setTrafficLight('green');
+    speak("Congratulations! Great job! You brought all the fruits to the market. Mission accomplished!");
+    
+    const reviewBox = document.getElementById('review-box');
+    if (mistakes.length === 0) {
+        reviewBox.innerHTML = '<div class="no-mistakes">🌟 Perfect! No mistakes! 🌟</div>';
+    } else {
+        const uniqueMistakes = [];
+        const seen = new Set();
+        mistakes.forEach(m => {
+            if (!seen.has(m.id)) {
+                seen.add(m.id);
+                uniqueMistakes.push(m);
+            }
+        });
+        
+        let html = '<h3>📚 Let\'s Review!</h3>';
+        uniqueMistakes.forEach(fruit => {
+            html += `
+                <div class="review-item">
+                    <span class="emoji">${fruit.emoji}</span>
+                    <strong>${fruit.name}</strong>
+                    <button class="play-btn" onclick="speak('${fruit.name}')">🔊 Listen</button>
+                </div>
+            `;
+        });
+        reviewBox.innerHTML = html;
+    }
+    
+    // Confetti
+    for (let i = 0; i < 60; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.background = ['#FFD700', '#FF6347', '#32CD32', '#1E90FF', '#FF69B4'][Math.floor(Math.random() * 5)];
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+        document.body.appendChild(confetti);
+    }
+    
+    setTimeout(() => {
+        document.getElementById('final-screen').classList.add('show');
+    }, 500);
+}
+
+// Initialize
+generateRounds();
+setupSpeakers();
+setupDropZones();
+loadRound();
+</script>
+
+</body>
+</html>
