@@ -248,12 +248,36 @@
         function loadList() {
             const grid = document.getElementById('vocab-grid');
             grid.innerHTML = '';
-            vocabulary.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'vocab-item';
-                div.innerHTML = `<div style="font-size:3em">${item.icon}</div><div style="font-weight:bold">${item.word}</div>`;
-                grid.appendChild(div);
-            });
+           /* Agrega esto dentro de tu etiqueta <style> */
+
+.vocab-item {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    display: flex;          /* Usamos Flexbox para centrar todo */
+    flex-direction: column; /* Apila icono y texto verticalmente */
+    align-items: center;    /* Centra horizontalmente */
+    justify-content: center;/* Centra verticalmente */
+    height: 180px;          /* Altura fija para uniformidad */
+}
+
+/* Regla específica para las IMÁGENES dentro de la lista */
+.vocab-item img {
+    width: 60px !important;     /* Tamaño fijo y controlado */
+    height: 60px !important;    /* Mismo alto para mantener proporción */
+    object-fit: contain;        /* Asegura que no se deforme */
+    margin-bottom: 10px;
+    display: block;             /* Evita espacios raros debajo de la imagen */
+}
+
+/* Para los EMOJIS, mantenemos el tamaño grande pero controlado */
+.vocab-item div:first-child:not(:has(img)) {
+    font-size: 3em;
+    margin-bottom: 10px;
+    line-height: 1;
+});
         }
     </script>
 </body>
