@@ -50,10 +50,27 @@
         .memory-card.matched { background: #4CAF50; color: white; cursor: default; }
         .memory-card img { width: 70%; height: 70%; object-fit: contain; }
 
-        /* Vocabulary List */
+        /* Vocabulary List - CORREGIDO */
         .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
-        .vocab-item { background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .vocab-img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; }
+        .vocab-item { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 15px; 
+            text-align: center; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+        /* Esta regla es la clave: fuerza a las imágenes a tener un tamaño uniforme */
+        .vocab-item img {
+            width: 80px !important;
+            height: 80px !important;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
         .back-btn { background: #f5576c; margin-bottom: 20px; }
     </style>
 </head>
@@ -114,13 +131,12 @@
 
     <script>
         // CONFIGURACIÓN DE VOCABULARIO
-        // Asegúrate de que los nombres de archivo coincidan con los de tu carpeta 'img'
         const vocabulary = [
             { word: 'BAT', icon: '<img src="img/bat.svg" alt="Bat">', type: 'image' },
             { word: 'COW', icon: '🐄', type: 'emoji' },
             { word: 'RAT', icon: '🐀', type: 'emoji' },
-            { word: 'BIRD', icon: '🕊️', type: 'emoji' },
-            { word: 'PAPER', icon: '📄', type: 'emoji' },
+            { word: 'BIRD', icon: '️', type: 'emoji' },
+            { word: 'PAPER', icon: '', type: 'emoji' },
             { word: 'CRAYON', icon: '🖍️', type: 'emoji' },
             { word: 'MARKER', icon: '🖋️', type: 'emoji' },
             { word: 'GLUE', icon: '🧴', type: 'emoji' },
@@ -248,36 +264,12 @@
         function loadList() {
             const grid = document.getElementById('vocab-grid');
             grid.innerHTML = '';
-           /* Agrega esto dentro de tu etiqueta <style> */
-
-.vocab-item {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    display: flex;          /* Usamos Flexbox para centrar todo */
-    flex-direction: column; /* Apila icono y texto verticalmente */
-    align-items: center;    /* Centra horizontalmente */
-    justify-content: center;/* Centra verticalmente */
-    height: 180px;          /* Altura fija para uniformidad */
-}
-
-/* Regla específica para las IMÁGENES dentro de la lista */
-.vocab-item img {
-    width: 60px !important;     /* Tamaño fijo y controlado */
-    height: 60px !important;    /* Mismo alto para mantener proporción */
-    object-fit: contain;        /* Asegura que no se deforme */
-    margin-bottom: 10px;
-    display: block;             /* Evita espacios raros debajo de la imagen */
-}
-
-/* Para los EMOJIS, mantenemos el tamaño grande pero controlado */
-.vocab-item div:first-child:not(:has(img)) {
-    font-size: 3em;
-    margin-bottom: 10px;
-    line-height: 1;
-});
+            vocabulary.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'vocab-item';
+                div.innerHTML = `<div>${item.icon}</div><div style="font-weight:bold; margin-top:10px;">${item.word}</div>`;
+                grid.appendChild(div);
+            });
         }
     </script>
 </body>
