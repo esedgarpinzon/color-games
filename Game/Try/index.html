@@ -50,27 +50,35 @@
         .memory-card.matched { background: #4CAF50; color: white; cursor: default; }
         .memory-card img { width: 70%; height: 70%; object-fit: contain; }
 
-        /* Vocabulary List - CORREGIDO */
-        .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
-        .vocab-item { 
-            background: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 15px; 
-            text-align: center; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 180px;
-        }
-        /* Esta regla es la clave: fuerza a las imágenes a tener un tamaño uniforme */
-        .vocab-item img {
-            width: 80px !important;
-            height: 80px !important;
-            object-fit: contain;
-            margin-bottom: 15px;
-        }
+       /* Vocabulary List - AJUSTADO */
+.vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+.vocab-item { 
+    background: #f8f9fa; 
+    padding: 20px; 
+    border-radius: 15px; 
+    text-align: center; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+}
+
+/* Regla para IMÁGENES (SVG) - Se quedan en 80px como te gustaron */
+.vocab-item img {
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: contain;
+    margin-bottom: 15px;
+}
+
+/* Regla específica para EMOJIS - Les damos más tamaño */
+.vocab-item div:first-child:not(:has(img)) {
+    font-size: 4.5em; /* Mucho más grande que antes */
+    line-height: 1.2;
+    margin-bottom: 15px;
+}
         .back-btn { background: #f5576c; margin-bottom: 20px; }
     </style>
 </head>
