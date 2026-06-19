@@ -1,781 +1,869 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>🧪 El Laboratorio del Dr. Opuesto - CON SONIDO</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Comic Sans MS', cursive; }
-  
-  body {
-    min-height: 100vh;
-    background: linear-gradient(180deg, #1a0033 0%, #330066 50%, #0d001a 100%);
-    overflow: hidden;
-    position: relative;
-  }
-  
-  /* Botón de mute */
-  .mute-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    border: 2px solid #00ff99;
-    color: #00ff99;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 100;
-    transition: all 0.3s;
-  }
-  .mute-btn:hover {
-    background: rgba(0,255,150,0.3);
-    transform: scale(1.1);
-  }
-  .mute-btn.muted {
-    background: rgba(255,0,100,0.3);
-    border-color: #ff3366;
-    color: #ff3366;
-  }
-  
-  /* Burbujas de fondo tipo laboratorio */
-  .bubble {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgba(0,255,150,0.4), rgba(0,100,200,0.1));
-    animation: float 8s infinite ease-in-out;
-    pointer-events: none;
-  }
-  @keyframes float {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-30px) translateX(20px); }
-  }
-  
-  /* Header con puntaje */
-  .header {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-    padding: 10px 30px;
-    border-radius: 30px;
-    border: 2px solid #00ff99;
-    color: #00ff99;
-    font-size: 20px;
-    font-weight: bold;
-    text-shadow: 0 0 10px #00ff99;
-    z-index: 10;
-  }
-  
-  /* Escenario principal */
-  .stage {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  /* Científico loco */
-  .scientist {
-    position: absolute;
-    left: 5%;
-    bottom: 15%;
-    font-size: 120px;
-    animation: scientistBounce 2s infinite ease-in-out;
-    filter: drop-shadow(0 0 15px #00ff99);
-    z-index: 5;
-  }
-  @keyframes scientistBounce {
-    0%, 100% { transform: translateY(0) rotate(-3deg); }
-    50% { transform: translateY(-10px) rotate(3deg); }
-  }
-  .scientist::after {
-    content: attr(data-speech);
-    position: absolute;
-    top: -50px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    color: #330066;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 18px;
-    white-space: nowrap;
-    font-weight: bold;
-    opacity: 0;
-    transition: opacity 0.3s;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-  }
-  .scientist.talking::after { opacity: 1; }
-  
-  /* La MÁQUINA */
-  .machine {
-    position: relative;
-    width: 320px;
-    height: 380px;
-    background: linear-gradient(145deg, #4a4a6a, #2a2a4a);
-    border-radius: 30px;
-    border: 6px solid #888;
-    box-shadow: 
-      inset 0 0 30px rgba(0,0,0,0.5),
-      0 0 40px rgba(0,255,150,0.3),
-      0 10px 30px rgba(0,0,0,0.5);
-    z-index: 3;
-  }
-  
-  /* Tubos laterales */
-  .tube {
-    position: absolute;
-    width: 40px;
-    height: 150px;
-    background: linear-gradient(90deg, #00ff99, #00ccff, #00ff99);
-    border-radius: 20px;
-    top: 50px;
-    opacity: 0.7;
-    box-shadow: 0 0 20px #00ff99;
-  }
-  .tube.left { left: -25px; }
-  .tube.right { right: -25px; }
-  .tube::before {
-    content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: white;
-    border-radius: 50%;
-    top: 20%;
-    left: 10px;
-    animation: bubbleUp 2s infinite;
-  }
-  @keyframes bubbleUp {
-    0% { top: 80%; opacity: 0; }
-    50% { opacity: 1; }
-    100% { top: 10%; opacity: 0; }
-  }
-  
-  /* Pantalla de la máquina */
-  .screen {
-    position: absolute;
-    top: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 240px;
-    height: 200px;
-    background: radial-gradient(circle, #001a00, #000);
-    border-radius: 20px;
-    border: 5px solid #555;
-    box-shadow: inset 0 0 30px #00ff99, 0 0 15px rgba(0,255,150,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
-  
-  /* Objeto dentro de la pantalla */
-  .object {
-    font-size: 100px;
-    transition: all 0.5s;
-    filter: drop-shadow(0 0 10px #fff);
-  }
-  .object.entering {
-    animation: enterMachine 1s forwards;
-  }
-  @keyframes enterMachine {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(0.3) rotate(360deg); opacity: 0.5; filter: blur(5px); }
-    100% { transform: scale(0) rotate(720deg); opacity: 0; }
-  }
-  .object.transforming {
-    animation: transform 1.5s forwards;
-  }
-  @keyframes transform {
-    0% { transform: scale(0); opacity: 0; }
-    30% { transform: scale(1.5) rotate(180deg); opacity: 1; filter: hue-rotate(90deg) brightness(2); }
-    60% { transform: scale(0.8) rotate(360deg); filter: hue-rotate(180deg); }
-    100% { transform: scale(1) rotate(360deg); filter: none; }
-  }
-  .object.exiting {
-    animation: exitMachine 1s forwards;
-  }
-  @keyframes exitMachine {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.5) translateY(50px); opacity: 0.5; }
-  }
-  
-  /* Luces de la máquina */
-  .lights {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 15px;
-  }
-  .light {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: #ff3366;
-    box-shadow: 0 0 10px #ff3366;
-    animation: blink 1s infinite;
-  }
-  .light:nth-child(2) { background: #ffcc00; box-shadow: 0 0 10px #ffcc00; animation-delay: 0.3s; }
-  .light:nth-child(3) { background: #00ff99; box-shadow: 0 0 10px #00ff99; animation-delay: 0.6s; }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  .machine.working .light { animation-duration: 0.2s; }
-  .machine.working { animation: shake 0.1s infinite; }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-3px); }
-    75% { transform: translateX(3px); }
-  }
-  
-  /* Cinta transportadora */
-  .conveyor {
-    position: absolute;
-    bottom: 8%;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: repeating-linear-gradient(
-      90deg,
-      #333 0px, #333 30px,
-      #555 30px, #555 60px
-    );
-    border-top: 4px solid #888;
-    border-bottom: 4px solid #888;
-    animation: moveConveyor 1s linear infinite;
-    z-index: 2;
-  }
-  @keyframes moveConveyor {
-    0% { background-position: 0 0; }
-    100% { background-position: 60px 0; }
-  }
-  
-  /* Palabra objetivo */
-  .word-display {
-    position: absolute;
-    top: 90px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, #ff0066, #ff9900);
-    padding: 15px 40px;
-    border-radius: 30px;
-    color: white;
-    font-size: 32px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    box-shadow: 0 5px 20px rgba(255,0,102,0.5);
-    border: 3px solid white;
-    z-index: 10;
-    text-shadow: 2px 2px 0 #000;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  .word-display:hover {
-    transform: translateX(-50%) scale(1.05);
-  }
-  .word-display::after {
-    content: "🔊";
-    margin-left: 10px;
-    font-size: 24px;
-  }
-  
-  /* Botones de respuesta */
-  .buttons {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    z-index: 10;
-  }
-  .btn {
-    padding: 15px 25px;
-    font-size: 22px;
-    font-weight: bold;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    color: white;
-    min-width: 140px;
-    transition: all 0.2s;
-    box-shadow: 0 5px 0 rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.4);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-    font-family: 'Comic Sans MS', cursive;
-    position: relative;
-  }
-  .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 0 rgba(0,0,0,0.3), 0 12px 25px rgba(0,0,0,0.5); }
-  .btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 3px 0 rgba(0,0,0,0.3); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-1 { background: linear-gradient(135deg, #ff4757, #c44569); }
-  .btn-2 { background: linear-gradient(135deg, #3742fa, #2f3be0); }
-  .btn-3 { background: linear-gradient(135deg, #2ed573, #1e9c54); }
-  .btn::after {
-    content: "🔊";
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    font-size: 20px;
-    background: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  }
-  
-  /* Mensaje de feedback */
-  .feedback {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    font-size: 80px;
-    font-weight: bold;
-    pointer-events: none;
-    z-index: 100;
-    text-shadow: 0 0 30px currentColor;
-  }
-  .feedback.show {
-    animation: feedbackPop 1.2s forwards;
-  }
-  @keyframes feedbackPop {
-    0% { transform: translate(-50%, -50%) scale(0) rotate(-20deg); opacity: 0; }
-    30% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
-    70% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(0.5) rotate(0); opacity: 0; }
-  }
-  .feedback.correct { color: #00ff99; }
-  .feedback.wrong { color: #ff3366; }
-  
-  /* Pantalla final */
-  .end-screen {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 200;
-    color: white;
-    text-align: center;
-  }
-  .end-screen.show { display: flex; }
-  .end-screen h1 {
-    font-size: 60px;
-    color: #00ff99;
-    text-shadow: 0 0 30px #00ff99;
-    margin-bottom: 20px;
-    animation: pulse 1s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-  .end-screen p { font-size: 28px; margin: 10px; }
-  .end-screen button {
-    margin-top: 30px;
-    padding: 20px 50px;
-    font-size: 24px;
-    background: linear-gradient(135deg, #ff0066, #ff9900);
-    color: white;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 5px 20px rgba(255,0,102,0.5);
-    font-family: 'Comic Sans MS', cursive;
-  }
-  
-  /* Confeti */
-  .confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    top: -10px;
-    animation: fall 3s linear forwards;
-    z-index: 150;
-  }
-  @keyframes fall {
-    to { transform: translateY(110vh) rotate(720deg); }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UEC Academy - English Opposites</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           ESTILOS GENERALES
+           ========================================= */
+        :root {
+            --bg-gradient: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
+            --balloon-colors: #FF6B6B, #4ECDC4, #FFE66D, #FF9F43, #A29BFE, #FD79A8;
+        }
+
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-gradient);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* =========================================
+           MENÚ PRINCIPAL
+           ========================================= */
+        #main-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-gradient);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+        }
+
+        .main-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 10vmin;
+            color: #2D3436;
+            text-shadow: 3px 3px 0px #FFF;
+            margin-bottom: 5vh;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .menu-btn {
+            background: #fff;
+            border: 4px solid #4ECDC4;
+            border-radius: 20px;
+            padding: 3vh 6vw;
+            font-size: 5vmin;
+            font-family: 'Fredoka One', cursive;
+            color: #2D3436;
+            cursor: pointer;
+            margin: 2vh;
+            box-shadow: 0 6px 0 #2A9D8F, 0 10px 10px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+            width: 80vw;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .menu-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2A9D8F, 0 4px 4px rgba(0,0,0,0.1);
+        }
+
+        .menu-btn.play-btn {
+            border-color: #FF9F43;
+            box-shadow: 0 6px 0 #E67E22, 0 10px 10px rgba(0,0,0,0.1);
+            background: #FFF5E6;
+        }
+
+        .menu-btn.play-btn:active {
+            box-shadow: 0 2px 0 #E67E22, 0 4px 4px rgba(0,0,0,0.1);
+        }
+
+        /* =========================================
+           BOTÓN HOME (Navegación)
+           ========================================= */
+        .home-btn {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            background: #fff;
+            border: 3px solid #FF9F43;
+            border-radius: 50%;
+            width: 10vmin;
+            height: 10vmin;
+            font-size: 5vmin;
+            cursor: pointer;
+            z-index: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 #E67E22;
+            transition: transform 0.1s;
+        }
+
+        .home-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #E67E22;
+        }
+
+        /* =========================================
+           PANTALLA DE REPASO (FLASHCARDS)
+           ========================================= */
+        #review-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-gradient);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 400;
+            overflow-y: auto;
+            padding-top: 15vh;
+            padding-bottom: 5vh;
+        }
+
+        .review-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 6vmin;
+            color: #2D3436;
+            margin-bottom: 4vh;
+            text-align: center;
+            padding: 0 5vw;
+        }
+
+        #review-cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4vmin;
+            width: 90vw;
+            max-width: 800px;
+        }
+
+        /* Animación 3D de la tarjeta */
+        .card {
+            background-color: transparent;
+            width: 25vmin;
+            height: 25vmin;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg) scale(1.05);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .card-front {
+            background-color: #FFF;
+            border: 4px solid #4ECDC4;
+            font-size: 12vmin;
+        }
+        
+        /* Estilo para imágenes dentro de las tarjetas */
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-back {
+            background-color: #FFE66D;
+            border: 4px solid #FF9F43;
+            transform: rotateY(180deg);
+            font-family: 'Fredoka One', cursive;
+            font-size: 5vmin;
+            color: #2D3436;
+        }
+
+        /* =========================================
+           CONTENEDOR DEL JUEGO
+           ========================================= */
+        #game-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #game-ui {
+            position: absolute;
+            top: 5vh;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #speaker-btn {
+            pointer-events: auto;
+            background: #fff;
+            border: 4px solid #FF9F43;
+            border-radius: 50%;
+            width: 15vmin;
+            height: 15vmin;
+            font-size: 8vmin;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #E67E22, 0 10px 10px rgba(0,0,0,0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2vh;
+        }
+
+        #speaker-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #E67E22, 0 4px 4px rgba(0,0,0,0.2);
+        }
+
+        #target-word {
+            font-family: 'Fredoka One', cursive;
+            font-size: 8vmin;
+            color: #2D3436;
+            text-shadow: 3px 3px 0px #FFF;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1vh 4vw;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        #target-word.visible {
+            opacity: 1;
+        }
+
+        #game-area {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .balloon {
+            position: absolute;
+            bottom: -25vh;
+            width: 22vmin;
+            height: 26vmin;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: inset -1vmin -1vmin 2vmin rgba(0,0,0,0.1), 0 1vmin 0.5vmin rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .balloon-content {
+            width: 90%;
+            height: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10vmin;
+            transition: filter 0.2s ease;
+            overflow: hidden;
+            border-radius: 50%;
+        }
+        
+        .balloon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -2.5vmin;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0.4vmin;
+            height: 3vmin;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .balloon::before {
+            content: '';
+            position: absolute;
+            bottom: -0.5vmin;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 1vmin solid transparent;
+            border-right: 1vmin solid transparent;
+            border-top: 1.5vmin solid inherit;
+        }
+
+        .balloon:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-25vh) rotate(2deg); }
+            50% { transform: translateY(-50vh) rotate(-2deg); }
+            75% { transform: translateY(-75vh) rotate(1deg); }
+            100% { transform: translateY(-120vh) rotate(0deg); }
+        }
+
+        @keyframes shake-emoji {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            20% { transform: translateX(-1.5vmin) rotate(-10deg); }
+            40% { transform: translateX(1.5vmin) rotate(10deg); }
+            60% { transform: translateX(-1.5vmin) rotate(-10deg); }
+            80% { transform: translateX(1.5vmin) rotate(10deg); }
+        }
+
+        .shake-error .balloon-content {
+            animation: shake-emoji 0.4s ease-in-out;
+            filter: brightness(0.7) sepia(1) hue-rotate(-50deg) saturate(5);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .popped {
+            animation: pop 0.3s ease-out forwards !important;
+            pointer-events: none;
+        }
+
+        #end-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            text-align: center;
+            padding: 5vmin;
+        }
+
+        #end-screen h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 10vmin;
+            color: #FF9F43;
+            margin-bottom: 2vh;
+            text-shadow: 2px 2px 0 #FFF;
+        }
+
+        #end-screen p {
+            font-size: 4vmin;
+            color: #2D3436;
+            margin-bottom: 4vh;
+        }
+
+        #mistakes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3vmin;
+            margin-bottom: 4vh;
+            max-width: 80vw;
+        }
+
+        .mistake-item {
+            background: #FFF;
+            border: 3px solid #FF6B6B;
+            border-radius: 15px;
+            padding: 2vmin;
+            font-size: 6vmin;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            width: 15vmin;
+            height: 15vmin;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .mistake-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mistake-item:active {
+            transform: scale(0.9);
+        }
+
+        .restart-btn {
+            background: #4ECDC4;
+            color: white;
+            border: none;
+            padding: 3vmin 8vmin;
+            font-size: 5vmin;
+            font-family: 'Fredoka One', cursive;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #2A9D8F, 0 10px 10px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+
+        .restart-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2A9D8F, 0 4px 4px rgba(0,0,0,0.2);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 2vmin;
+            height: 2vmin;
+            background: #f00;
+            animation: fall linear forwards;
+            z-index: 300;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
+    </style>
 </head>
 <body>
 
-<button class="mute-btn" id="muteBtn" title="Silenciar/Activar sonido">🔊</button>
-
-<div class="header">⭐ Puntos: <span id="score">0</span> | 🧪 Nivel: <span id="level">1</span>/9</div>
-
-<div class="word-display" id="wordDisplay">Cargando...</div>
-
-<div class="stage">
-  <div class="scientist" id="scientist" data-speech="¡Transformemos!">🧑‍🔬</div>
-  
-  <div class="machine" id="machine">
-    <div class="tube left"></div>
-    <div class="tube right"></div>
-    <div class="screen">
-      <div class="object" id="object">🎈</div>
+    <!-- MENÚ PRINCIPAL -->
+    <div id="main-menu">
+        <h1 class="main-title">Welcome to<br>UEC Academy 🎓</h1>
+        <button class="menu-btn" onclick="showReview()">Review Vocabulary 📚</button>
+        <button class="menu-btn play-btn" onclick="showGame()">Let's Play 🤩</button>
     </div>
-    <div class="lights">
-      <div class="light"></div>
-      <div class="light"></div>
-      <div class="light"></div>
+
+    <!-- PANTALLA DE REPASO -->
+    <div id="review-screen">
+        <button class="home-btn" onclick="showMainMenu()">🏠🔙</button>
+        <h2 class="review-title">Tap a card to listen! 👂</h2>
+        <div id="review-cards-container"></div>
     </div>
-  </div>
-</div>
 
-<div class="conveyor"></div>
+    <!-- CONTENEDOR DEL JUEGO -->
+    <div id="game-container">
+        <button class="home-btn" onclick="showMainMenu()">🏠🔙</button>
+        <div id="game-ui">
+            <button id="speaker-btn" onclick="playCurrentWord()">🔊</button>
+            <div id="target-word"></div>
+        </div>
+        <div id="game-area"></div>
+        <div id="end-screen">
+            <h1>¡Great Job! 🎉</h1>
+            <p>¡Lo hiciste muy bien!</p>
+            <div id="mistakes-title" style="display:none; font-size: 4vmin; color: #FF6B6B; font-weight: bold; margin-bottom: 2vh;">
+                Practiquemos estas un poco más (¡Tócalas para escuchar!):
+            </div>
+            <div id="mistakes-container"></div>
+            <button class="restart-btn" onclick="initGame()">Jugar Otra Vez 🔄</button>
+        </div>
+    </div>
 
-<div class="buttons" id="buttons">
-  <button class="btn btn-1" data-answer="0"></button>
-  <button class="btn btn-2" data-answer="1"></button>
-  <button class="btn btn-3" data-answer="2"></button>
-</div>
+    <script>
+        /* =========================================
+           1. CONFIGURACIÓN Y VOCABULARIO
+           ========================================= */
+        const vocabulary = [
+            // Pares de Opuestos con Emojis Específicos
+            { word: "Open", emoji: "🤚", pair: "Shut" },
+            { word: "Shut", emoji: "✊", pair: "Open" },
+            
+            { word: "Big", emoji: "🐘", pair: "Small" },
+            { word: "Small", emoji: "🐜", pair: "Big" },
+            
+            { word: "Fast", emoji: "🚀", pair: "Slow" },
+            { word: "Slow", emoji: "🐌", pair: "Fast" },
+            
+            { word: "Loud", emoji: "📢", pair: "Quiet" },
+            { word: "Quiet", emoji: "🤫", pair: "Loud" },
+            
+            { word: "Tall", emoji: "🌲", pair: "Short" },
+            { word: "Short", emoji: "🌱", pair: "Tall" },
+            
+            { word: "Thin", emoji: "🦩", pair: "Chubby" },
+            { word: "Chubby", emoji: "🦛", pair: "Thin" },
+            
+            // Solo estos dos usan IMÁGENES
+            { word: "Old", emoji: "img/old.jpg", pair: "New" },
+            { word: "New", emoji: "img/new.jpg", pair: "Old" },
+            
+            { word: "Strong", emoji: "💪", pair: "Weak" },
+            { word: "Weak", emoji: "🥀", pair: "Strong" },
+            
+            { word: "Nice", emoji: "😇", pair: "Bad" },
+            { word: "Bad", emoji: "😈", pair: "Nice" }
+        ];
 
-<div class="feedback" id="feedback"></div>
+        const balloonColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F43', '#A29BFE', '#FD79A8', '#55E6C1'];
 
-<div class="end-screen" id="endScreen">
-  <h1>🎉 ¡INCREÍBLE! 🎉</h1>
-  <p>¡Eres un verdadero científico de los opuestos!</p>
-  <p>⭐ Puntaje final: <span id="finalScore">0</span></p>
-  <p>🧪 Transformaciones completadas: 9/9</p>
-  <button onclick="restartGame()">🔄 Jugar de nuevo</button>
-</div>
+        let gameQueue = [];
+        let currentIndex = 0;
+        let mistakes = [];
+        let isLevelActive = false;
+        let speechSynth = window.speechSynthesis;
 
-<script>
-  // ============ SISTEMA DE AUDIO ============
-  let isMuted = false;
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  
-  // Función para hablar en inglés
-  function speak(text, rate = 0.9) {
-    if (isMuted) return;
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = rate;
-      utterance.pitch = 1.1;
-      utterance.volume = 1;
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-  
-  // Generar sonidos con Web Audio API
-  function playTone(frequency, duration, type = 'sine') {
-    if (isMuted) return;
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    oscillator.frequency.value = frequency;
-    oscillator.type = type;
-    
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-    
-    oscillator.start(audioCtx.currentTime);
-    oscillator.stop(audioCtx.currentTime + duration);
-  }
-  
-  // Sonido de éxito (acorde mayor)
-  function playSuccess() {
-    if (isMuted) return;
-    playTone(523.25, 0.15); // Do
-    setTimeout(() => playTone(659.25, 0.15), 100); // Mi
-    setTimeout(() => playTone(783.99, 0.3), 200); // Sol
-  }
-  
-  // Sonido de error
-  function playError() {
-    if (isMuted) return;
-    playTone(200, 0.2, 'sawtooth');
-    setTimeout(() => playTone(150, 0.3, 'sawtooth'), 150);
-  }
-  
-  // Sonido de transformación de la máquina
-  function playTransform() {
-    if (isMuted) return;
-    for (let i = 0; i < 8; i++) {
-      setTimeout(() => {
-        playTone(200 + i * 100, 0.1, 'square');
-      }, i * 80);
-    }
-  }
-  
-  // Sonido de botón
-  function playClick() {
-    if (isMuted) return;
-    playTone(800, 0.05);
-  }
-  
-  // Botón de mute
-  const muteBtn = document.getElementById('muteBtn');
-  muteBtn.addEventListener('click', () => {
-    isMuted = !isMuted;
-    muteBtn.textContent = isMuted ? '🔇' : '🔊';
-    muteBtn.classList.toggle('muted', isMuted);
-    if (!isMuted) {
-      audioCtx.resume();
-    }
-  });
-  
-  // ============ LÓGICA DEL JUEGO ============
-  const pairs = [
-    { word: "OPEN",  emoji: "🚪", opposite: "SHUT",   oppEmoji: "🚪", hint: "cerrar" },
-    { word: "BIG",   emoji: "🎈", opposite: "SMALL",  oppEmoji: "🎈", hint: "pequeño" },
-    { word: "FAST",  emoji: "🐰", opposite: "SLOW",   oppEmoji: "🐢", hint: "lento" },
-    { word: "LOUD",  emoji: "🔊", opposite: "QUIET",  oppEmoji: "🔈", hint: "silencio" },
-    { word: "TALL",  emoji: "🦒", opposite: "SHORT",  oppEmoji: "🐁", hint: "bajo" },
-    { word: "THIN",  emoji: "🥕", opposite: "CHUBBY", oppEmoji: "🐷", hint: "gordito" },
-    { word: "OLD",   emoji: "👴", opposite: "NEW",    oppEmoji: "👶", hint: "nuevo/bebé" },
-    { word: "STRONG",emoji: "💪", opposite: "WEAK",   oppEmoji: "🐭", hint: "débil" },
-    { word: "NICE",  emoji: "😇", opposite: "BAD",    oppEmoji: "😈", hint: "malo" }
-  ];
-  
-  let currentPair = null;
-  let score = 0;
-  let level = 0;
-  let isAnimating = false;
-  let shuffledPairs = [];
-  
-  const objectEl = document.getElementById('object');
-  const wordDisplay = document.getElementById('wordDisplay');
-  const buttons = document.querySelectorAll('.btn');
-  const machine = document.getElementById('machine');
-  const feedback = document.getElementById('feedback');
-  const scientist = document.getElementById('scientist');
-  const scoreEl = document.getElementById('score');
-  const levelEl = document.getElementById('level');
-  const endScreen = document.getElementById('endScreen');
-  
-  function createBubbles() {
-    for (let i = 0; i < 15; i++) {
-      const b = document.createElement('div');
-      b.className = 'bubble';
-      const size = Math.random() * 80 + 30;
-      b.style.width = size + 'px';
-      b.style.height = size + 'px';
-      b.style.left = Math.random() * 100 + '%';
-      b.style.top = Math.random() * 100 + '%';
-      b.style.animationDelay = Math.random() * 5 + 's';
-      document.body.appendChild(b);
-    }
-  }
-  createBubbles();
-  
-  function shuffle(arr) {
-    return arr.sort(() => Math.random() - 0.5);
-  }
-  
-  function startRound() {
-    if (level >= shuffledPairs.length) {
-      endGame();
-      return;
-    }
-    
-    currentPair = shuffledPairs[level];
-    isAnimating = false;
-    
-    wordDisplay.textContent = currentPair.word;
-    objectEl.textContent = currentPair.emoji;
-    objectEl.className = 'object';
-    
-    levelEl.textContent = level + 1;
-    
-    buttons.forEach(b => b.disabled = false);
-    
-    const distractors = pairs.filter(p => p.opposite !== currentPair.opposite);
-    const shuffledDist = shuffle([...distractors]).slice(0, 2);
-    const options = shuffle([
-      { text: currentPair.opposite, correct: true },
-      { text: shuffledDist[0].opposite, correct: false },
-      { text: shuffledDist[1].opposite, correct: false }
-    ]);
-    
-    buttons.forEach((btn, i) => {
-      btn.textContent = options[i].text;
-      btn.dataset.correct = options[i].correct;
-    });
-    
-    scientist.classList.add('talking');
-    scientist.dataset.speech = "¡Transformemos!";
-    
-    // Pronunciar la palabra automáticamente
-    setTimeout(() => {
-      speak(currentPair.word);
-      scientist.dataset.speech = `Say: ${currentPair.word}`;
-    }, 500);
-    
-    setTimeout(() => scientist.classList.remove('talking'), 3000);
-  }
-  
-  // Click en palabra para escuchar
-  wordDisplay.addEventListener('click', () => {
-    if (currentPair) {
-      playClick();
-      speak(currentPair.word);
-    }
-  });
-  
-  // Click en botones para escuchar
-  buttons.forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-      if (!btn.disabled) {
-        playClick();
-        speak(btn.textContent, 1);
-      }
-    });
-  });
-  
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (isAnimating) return;
-      isAnimating = true;
-      buttons.forEach(b => b.disabled = true);
-      
-      playClick();
-      const isCorrect = btn.dataset.correct === 'true';
-      
-      if (isCorrect) {
-        handleCorrect(btn);
-      } else {
-        handleWrong(btn);
-      }
-    });
-  });
-  
-  function handleCorrect(btn) {
-    score += 10;
-    scoreEl.textContent = score;
-    
-    playSuccess();
-    speak("Correct!");
-    
-    objectEl.classList.add('entering');
-    machine.classList.add('working');
-    
-    showFeedback('✅ ¡SÍ!', true);
-    
-    setTimeout(() => {
-      playTransform();
-      objectEl.textContent = currentPair.oppEmoji;
-      objectEl.classList.remove('entering');
-      objectEl.classList.add('transforming');
-      
-      wordDisplay.textContent = currentPair.opposite;
-      wordDisplay.style.background = 'linear-gradient(135deg, #00ff99, #00ccff)';
-      
-      scientist.dataset.speech = currentPair.opposite;
-      scientist.classList.add('talking');
-      
-      setTimeout(() => {
-        speak(currentPair.opposite);
-      }, 300);
-      
-      setTimeout(() => {
-        machine.classList.remove('working');
-        wordDisplay.style.background = '';
-        scientist.classList.remove('talking');
-        level++;
-        setTimeout(startRound, 1200);
-      }, 1500);
-    }, 1000);
-  }
-  
-  function handleWrong(btn) {
-    playError();
-    speak("Try again!");
-    
-    btn.style.animation = 'shake 0.5s';
-    setTimeout(() => btn.style.animation = '', 500);
-    
-    showFeedback('❌ ¡Intenta otra!', false);
-    
-    scientist.textContent = '🙀';
-    scientist.dataset.speech = "Oops!";
-    scientist.classList.add('talking');
-    
-    setTimeout(() => {
-      scientist.textContent = '🧑‍🔬';
-      scientist.classList.remove('talking');
-      isAnimating = false;
-      buttons.forEach(b => b.disabled = false);
-    }, 1200);
-  }
-  
-  function showFeedback(text, isCorrect) {
-    feedback.textContent = text;
-    feedback.className = 'feedback show ' + (isCorrect ? 'correct' : 'wrong');
-    setTimeout(() => feedback.className = 'feedback', 1200);
-  }
-  
-  function endGame() {
-    document.getElementById('finalScore').textContent = score;
-    endScreen.classList.add('show');
-    launchConfetti();
-    
-    setTimeout(() => {
-      speak("Congratulations! You are amazing!");
-    }, 500);
-  }
-  
-  function launchConfetti() {
-    const colors = ['#ff0066', '#00ff99', '#ffcc00', '#3742fa', '#ff9900'];
-    for (let i = 0; i < 80; i++) {
-      const c = document.createElement('div');
-      c.className = 'confetti';
-      c.style.left = Math.random() * 100 + '%';
-      c.style.background = colors[Math.floor(Math.random() * colors.length)];
-      c.style.animationDelay = Math.random() * 2 + 's';
-      c.style.animationDuration = (Math.random() * 2 + 2) + 's';
-      document.body.appendChild(c);
-      setTimeout(() => c.remove(), 5000);
-    }
-  }
-  
-  function restartGame() {
-    score = 0;
-    level = 0;
-    scoreEl.textContent = 0;
-    endScreen.classList.remove('show');
-    shuffledPairs = shuffle([...pairs]);
-    playClick();
-    startRound();
-  }
-  
-  // Iniciar juego
-  shuffledPairs = shuffle([...pairs]);
-  
-  // Activar audio al primer click (requerimiento del navegador)
-  document.addEventListener('click', function initAudio() {
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-    document.removeEventListener('click', initAudio);
-  }, { once: true });
-  
-  startRound();
-</script>
+        /* =========================================
+           2. NAVEGACIÓN ENTRE PANTALLAS
+           ========================================= */
+        function showMainMenu() {
+            document.getElementById('main-menu').style.display = 'flex';
+            document.getElementById('review-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'none';
+            
+            isLevelActive = false;
+            speechSynth.cancel();
+            document.getElementById('game-area').innerHTML = '';
+        }
 
+        function showReview() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('review-screen').style.display = 'flex';
+            document.getElementById('game-container').style.display = 'none';
+            createReviewCards();
+        }
+
+        function showGame() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('review-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            initGame();
+        }
+
+        /* =========================================
+           3. LÓGICA DE REPASO (FLASHCARDS EN PARES)
+           ========================================= */
+        function createReviewCards() {
+            const container = document.getElementById('review-cards-container');
+            container.innerHTML = '';
+            
+            vocabulary.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Verificar si es imagen o emoji
+                const isImage = item.emoji.includes('.jpg') || item.emoji.includes('.png');
+                const contentHtml = isImage 
+                    ? `<img src="${item.emoji}" class="card-img" alt="${item.word}">` 
+                    : item.emoji;
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">${contentHtml}</div>
+                        <div class="card-back">${item.word}</div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    if (!card.classList.contains('flipped')) {
+                        card.classList.add('flipped');
+                        speak(item.word);
+                        
+                        setTimeout(() => {
+                            card.classList.remove('flipped');
+                        }, 1200);
+                    }
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        /* =========================================
+           4. FUNCIONES DE AUDIO
+           ========================================= */
+        function speak(text) {
+            if (speechSynth.speaking) speechSynth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            speechSynth.speak(utterance);
+        }
+
+        function playSuccessSound() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function playErrorSound() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.2);
+        }
+
+        /* =========================================
+           5. LÓGICA DEL JUEGO (MODIFICADA PARA 2 OPCIONES)
+           ========================================= */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initGame() {
+            // Usamos solo las palabras "principales" de cada par para la cola del juego
+            // Tomamos los índices pares (0, 2, 4...) ya que definí el array manualmente en pares.
+            const primaryWords = vocabulary.filter((_, i) => i % 2 === 0);
+
+            gameQueue = shuffleArray([...primaryWords]);
+            currentIndex = 0;
+            mistakes = [];
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('game-area').innerHTML = '';
+            loadLevel();
+        }
+
+        function loadLevel() {
+            isLevelActive = true;
+            const currentData = gameQueue[currentIndex];
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = '';
+
+            // AQUÍ ESTÁ EL CAMBIO CLAVE: Solo 2 opciones
+            // 1. La correcta (currentData)
+            // 2. Su opuesto directo (buscamos en el array vocabulary quien tenga el word igual al pair de currentData)
+            const oppositeData = vocabulary.find(v => v.word === currentData.pair);
+            
+            let options = [currentData, oppositeData];
+            options = shuffleArray(options);
+
+            options.forEach((opt, index) => {
+                createBalloon(opt, opt.word === currentData.word, index);
+            });
+
+            document.getElementById('target-word').classList.remove('visible');
+        }
+
+        function createBalloon(data, isCorrect, index) {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            
+            const color = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+            balloon.style.backgroundColor = color;
+            balloon.style.borderTopColor = color;
+
+            // Posicionar los dos globos separados (izquierda y derecha)
+            const leftPos = index === 0 ? 20 : 60; 
+            balloon.style.left = leftPos + '%';
+
+            const duration = 6 + Math.random() * 4;
+            const delay = Math.random() * 2;
+            balloon.style.animation = `floatUp ${duration}s linear ${delay}s infinite`;
+
+            const content = document.createElement('div');
+            content.className = 'balloon-content';
+            
+            // Verificar si es imagen o emoji
+            const isImage = data.emoji.includes('.jpg') || data.emoji.includes('.png');
+            if (isImage) {
+                content.innerHTML = `<img src="${data.emoji}" class="balloon-img" alt="">`;
+            } else {
+                content.textContent = data.emoji;
+            }
+            
+            balloon.appendChild(content);
+
+            balloon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleBalloonClick(balloon, isCorrect, data);
+            });
+
+            document.getElementById('game-area').appendChild(balloon);
+        }
+
+        function playCurrentWord() {
+            if (currentIndex >= gameQueue.length) return;
+            const currentData = gameQueue[currentIndex];
+            
+            speak(currentData.word);
+            
+            const wordEl = document.getElementById('target-word');
+            wordEl.textContent = currentData.word;
+            wordEl.classList.add('visible');
+            
+            setTimeout(() => {
+                wordEl.classList.remove('visible');
+            }, 1000);
+        }
+
+        function handleBalloonClick(balloon, isCorrect, data) {
+            if (!isLevelActive) return;
+
+            if (isCorrect) {
+                isLevelActive = false;
+                playSuccessSound();
+                balloon.classList.add('popped');
+                createConfetti(balloon.getBoundingClientRect());
+                
+                setTimeout(() => {
+                    currentIndex++;
+                    if (currentIndex < gameQueue.length) {
+                        loadLevel();
+                    } else {
+                        endGame();
+                    }
+                }, 800);
+            } else {
+                playErrorSound();
+                balloon.classList.add('shake-error');
+                
+                if (!mistakes.find(m => m.word === data.word)) {
+                    mistakes.push(data);
+                }
+
+                setTimeout(() => {
+                    balloon.classList.remove('shake-error');
+                }, 400);
+            }
+        }
+
+        function endGame() {
+            const endScreen = document.getElementById('end-screen');
+            const mistakesContainer = document.getElementById('mistakes-container');
+            const mistakesTitle = document.getElementById('mistakes-title');
+            
+            mistakesContainer.innerHTML = '';
+            
+            if (mistakes.length > 0) {
+                mistakesTitle.style.display = 'block';
+                mistakes.forEach(m => {
+                    const div = document.createElement('div');
+                    div.className = 'mistake-item';
+                    
+                    const isImage = m.emoji.includes('.jpg') || m.emoji.includes('.png');
+                    if (isImage) {
+                        div.innerHTML = `<img src="${m.emoji}" class="mistake-img" alt="">`;
+                    } else {
+                        div.textContent = m.emoji;
+                    }
+                    
+                    div.title = "Toca para escuchar: " + m.word;
+                    
+                    div.addEventListener('click', () => {
+                        speak(m.word);
+                        div.style.transform = "scale(1.2)";
+                        setTimeout(() => {
+                            div.style.transform = "scale(1)";
+                        }, 200);
+                    });
+                    
+                    mistakesContainer.appendChild(div);
+                });
+                speak("Great job! Let's review these ones.");
+            } else {
+                mistakesTitle.style.display = 'none';
+                speak("Excellent! Perfect score!");
+            }
+            
+            endScreen.style.display = 'flex';
+            launchFullConfetti();
+        }
+
+        function createConfetti(rect) {
+            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+            for (let i = 0; i < 20; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.left = (rect.left + rect.width / 2) + 'px';
+                conf.style.top = (rect.top + rect.height / 2) + 'px';
+                
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = (Math.random() - 0.5) * 200;
+                conf.style.transform = `translate(${tx}px, ${ty}px)`;
+                conf.style.transition = 'all 0.5s ease-out';
+                
+                document.body.appendChild(conf);
+                
+                setTimeout(() => {
+                    conf.style.opacity = '0';
+                    setTimeout(() => conf.remove(), 500);
+                }, 50);
+            }
+        }
+
+        function launchFullConfetti() {
+            const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F43', '#A29BFE'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const conf = document.createElement('div');
+                    conf.className = 'confetti';
+                    conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    conf.style.left = Math.random() * 100 + 'vw';
+                    conf.style.top = '-5vh';
+                    conf.style.animationDuration = (2 + Math.random() * 3) + 's';
+                    document.body.appendChild(conf);
+                    setTimeout(() => conf.remove(), 5000);
+                }, i * 50);
+            }
+        }
+
+        // Iniciar en el menú principal
+        window.onload = showMainMenu;
+    </script>
 </body>
 </html>
