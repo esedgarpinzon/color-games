@@ -118,7 +118,7 @@
         }
 
         /* =========================================
-           PANTALLA DE REPASO (FLASHCARDS)
+           PANTALLA DE REPASO (FLASHCARDS MEJORADAS)
            ========================================= */
         #review-screen {
             position: absolute;
@@ -132,7 +132,7 @@
             align-items: center;
             z-index: 400;
             overflow-y: auto;
-            padding-top: 15vh;
+            padding-top: 12vh;
             padding-bottom: 5vh;
         }
 
@@ -140,25 +140,40 @@
             font-family: 'Fredoka One', cursive;
             font-size: 6vmin;
             color: #2D3436;
-            margin-bottom: 4vh;
+            margin-bottom: 3vh;
             text-align: center;
             padding: 0 5vw;
         }
 
+        /* Contenedor principal de pares */
         #review-cards-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 4vmin;
-            width: 90vw;
-            max-width: 800px;
+            gap: 2vmin;
+            width: 95vw;
+            max-width: 1000px;
         }
 
-        /* Animación 3D de la tarjeta */
+        /* El "Cuadrito Rectangular" que contiene el par */
+        .pair-group {
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px dashed #4ECDC4;
+            border-radius: 15px;
+            padding: 1vmin;
+            display: flex;
+            gap: 1vmin;
+            /* Forzamos 4 grupos por fila aprox, ajustando el ancho */
+            width: calc(25% - 2vmin); 
+            min-width: 140px; /* Para que no se aplasten demasiado en móvil */
+            justify-content: space-between;
+        }
+
+        /* Tarjeta individual más pequeña */
         .card {
             background-color: transparent;
-            width: 25vmin;
-            height: 25vmin;
+            width: 48%; /* Ocupa casi la mitad del grupo */
+            height: 18vmin; /* Más bajitas */
             perspective: 1000px;
             cursor: pointer;
         }
@@ -182,21 +197,20 @@
             height: 100%;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            border-radius: 20px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             overflow: hidden;
+            border: 2px solid white;
         }
 
         .card-front {
             background-color: #FFF;
-            border: 4px solid #4ECDC4;
-            font-size: 12vmin;
+            font-size: 8vmin; /* Emoji más pequeño */
         }
         
-        /* Estilo para imágenes dentro de las tarjetas */
         .card-img {
             width: 100%;
             height: 100%;
@@ -205,11 +219,24 @@
 
         .card-back {
             background-color: #FFE66D;
-            border: 4px solid #FF9F43;
+            border: 2px solid #FF9F43;
             transform: rotateY(180deg);
             font-family: 'Fredoka One', cursive;
-            font-size: 5vmin;
+            font-size: 3.5vmin; /* Letra más pequeña */
             color: #2D3436;
+        }
+
+        /* Ajuste para móviles muy estrechos: bajar a 2 columnas */
+        @media (max-width: 600px) {
+            .pair-group {
+                width: calc(50% - 2vmin);
+            }
+            .card {
+                height: 22vmin;
+            }
+            .card-front {
+                font-size: 10vmin;
+            }
         }
 
         /* =========================================
@@ -479,7 +506,7 @@
     <!-- PANTALLA DE REPASO -->
     <div id="review-screen">
         <button class="home-btn" onclick="showMainMenu()">🏠🔙</button>
-        <h2 class="review-title">Tap a card to listen! 👂</h2>
+        <h2 class="review-title">Tap cards to listen! 👂</h2>
         <div id="review-cards-container"></div>
     </div>
 
@@ -495,7 +522,7 @@
             <h1>¡Great Job! 🎉</h1>
             <p>¡Lo hiciste muy bien!</p>
             <div id="mistakes-title" style="display:none; font-size: 4vmin; color: #FF6B6B; font-weight: bold; margin-bottom: 2vh;">
-                Practiquemos estas un poco más (¡Tócalas para escuchar!):
+                Practiquemos estas un poco más:
             </div>
             <div id="mistakes-container"></div>
             <button class="restart-btn" onclick="initGame()">Jugar Otra Vez 🔄</button>
@@ -573,42 +600,52 @@
         }
 
         /* =========================================
-           3. LÓGICA DE REPASO (FLASHCARDS EN PARES)
+           3. LÓGICA DE REPASO (AGRUPADO EN PARES)
            ========================================= */
         function createReviewCards() {
             const container = document.getElementById('review-cards-container');
             container.innerHTML = '';
             
-            vocabulary.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
+            // Iteramos de 2 en 2 para crear los grupos
+            for (let i = 0; i < vocabulary.length; i += 2) {
+                const item1 = vocabulary[i];
+                const item2 = vocabulary[i+1];
                 
-                // Verificar si es imagen o emoji
-                const isImage = item.emoji.includes('.jpg') || item.emoji.includes('.png');
-                const contentHtml = isImage 
-                    ? `<img src="${item.emoji}" class="card-img" alt="${item.word}">` 
-                    : item.emoji;
+                // Crear el contenedor del par (el cuadrito rectangular)
+                const group = document.createElement('div');
+                group.className = 'pair-group';
+                
+                // Función auxiliar para crear tarjeta interna
+                const createCardHTML = (item) => {
+                    const isImage = item.emoji.includes('.jpg') || item.emoji.includes('.png');
+                    const contentHtml = isImage 
+                        ? `<img src="${item.emoji}" class="card-img" alt="${item.word}">` 
+                        : item.emoji;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-front">${contentHtml}</div>
+                            <div class="card-back">${item.word}</div>
+                        </div>
+                    `;
+                    
+                    card.addEventListener('click', () => {
+                        if (!card.classList.contains('flipped')) {
+                            card.classList.add('flipped');
+                            speak(item.word);
+                            setTimeout(() => card.classList.remove('flipped'), 1200);
+                        }
+                    });
+                    return card;
+                };
 
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-front">${contentHtml}</div>
-                        <div class="card-back">${item.word}</div>
-                    </div>
-                `;
+                group.appendChild(createCardHTML(item1));
+                group.appendChild(createCardHTML(item2));
                 
-                card.addEventListener('click', () => {
-                    if (!card.classList.contains('flipped')) {
-                        card.classList.add('flipped');
-                        speak(item.word);
-                        
-                        setTimeout(() => {
-                            card.classList.remove('flipped');
-                        }, 1200);
-                    }
-                });
-                
-                container.appendChild(card);
-            });
+                container.appendChild(group);
+            }
         }
 
         /* =========================================
@@ -654,7 +691,7 @@
         }
 
         /* =========================================
-           5. LÓGICA DEL JUEGO (MODIFICADA PARA 2 OPCIONES)
+           5. LÓGICA DEL JUEGO (ALEATORIA REAL)
            ========================================= */
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -665,11 +702,30 @@
         }
 
         function initGame() {
-            // Usamos solo las palabras "principales" de cada par para la cola del juego
-            // Tomamos los índices pares (0, 2, 4...) ya que definí el array manualmente en pares.
-            const primaryWords = vocabulary.filter((_, i) => i % 2 === 0);
+            // Creamos una lista de índices de pares (0, 1, 2... hasta 8)
+            let pairIndices = [];
+            for(let i=0; i<vocabulary.length; i+=2) {
+                pairIndices.push(i);
+            }
+            
+            // Mezclamos el orden de los pares
+            pairIndices = shuffleArray(pairIndices);
+            
+            gameQueue = [];
+            
+            // Para cada par, elegimos ALEATORIAMENTE cuál de los dos será la pregunta
+            pairIndices.forEach(index => {
+                const itemA = vocabulary[index];     // Ej: Open
+                const itemB = vocabulary[index + 1]; // Ej: Shut
+                
+                // 50% de probabilidad para cada uno
+                if (Math.random() > 0.5) {
+                    gameQueue.push(itemA);
+                } else {
+                    gameQueue.push(itemB);
+                }
+            });
 
-            gameQueue = shuffleArray([...primaryWords]);
             currentIndex = 0;
             mistakes = [];
             document.getElementById('end-screen').style.display = 'none';
@@ -683,9 +739,7 @@
             const gameArea = document.getElementById('game-area');
             gameArea.innerHTML = '';
 
-            // AQUÍ ESTÁ EL CAMBIO CLAVE: Solo 2 opciones
-            // 1. La correcta (currentData)
-            // 2. Su opuesto directo (buscamos en el array vocabulary quien tenga el word igual al pair de currentData)
+            // Buscar el opuesto
             const oppositeData = vocabulary.find(v => v.word === currentData.pair);
             
             let options = [currentData, oppositeData];
@@ -706,7 +760,6 @@
             balloon.style.backgroundColor = color;
             balloon.style.borderTopColor = color;
 
-            // Posicionar los dos globos separados (izquierda y derecha)
             const leftPos = index === 0 ? 20 : 60; 
             balloon.style.left = leftPos + '%';
 
@@ -717,7 +770,6 @@
             const content = document.createElement('div');
             content.className = 'balloon-content';
             
-            // Verificar si es imagen o emoji
             const isImage = data.emoji.includes('.jpg') || data.emoji.includes('.png');
             if (isImage) {
                 content.innerHTML = `<img src="${data.emoji}" class="balloon-img" alt="">`;
